@@ -45,8 +45,13 @@ local SaveManager = {} do
             end,
             Load = function(idx, data)
                 local object = SaveManager.Library.Toggles[idx]
-                if object and object.Value ~= data.value then
-                    object:SetValue(data.value)
+                if object then
+                    if object.Disabled then
+                        -- Store value directly when disabled (bypasses SetValue early return)
+                        object.Value = data.value
+                    elseif object.Value ~= data.value then
+                        object:SetValue(data.value)
+                    end
                 end
             end,
         },
