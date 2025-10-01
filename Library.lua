@@ -740,6 +740,7 @@ function Library:UpdateSearch(SearchText)
 
     Library.Searching = true
     Library.LastSearchTabs = {}
+    local TabMatchCounts = {}
 
     --// Loop through ALL tabs to search across entire UI
     for _, CurrentTab in pairs(Library.Tabs) do
@@ -748,6 +749,7 @@ function Library:UpdateSearch(SearchText)
         end
 
         table.insert(Library.LastSearchTabs, CurrentTab)
+        TabMatchCounts[CurrentTab] = 0
 
         --// Loop through Groupboxes to get Elements Info
         for _, Groupbox in pairs(CurrentTab.Groupboxes) do
@@ -796,6 +798,9 @@ function Library:UpdateSearch(SearchText)
 
                 VisibleElements += CheckDepbox(Depbox, Search)
             end
+
+            --// Track match count for this tab
+            TabMatchCounts[CurrentTab] += VisibleElements
 
             --// Always resize and keep groupbox visible (clean look)
             Groupbox:Resize()
@@ -858,6 +863,7 @@ function Library:UpdateSearch(SearchText)
                 Tab.ButtonHolder.Visible = Visible > 0
                 if Visible > 0 then
                     VisibleTabs += 1
+                    TabMatchCounts[CurrentTab] += Visible
 
                     if Tabbox.ActiveTab == Tab then
                         Tab:Resize()
@@ -922,9 +928,22 @@ function Library:UpdateSearch(SearchText)
                 VisibleElements += CheckDepbox(Depbox, Search)
             end
 
+            --// Track match count for this tab
+            TabMatchCounts[CurrentTab] += VisibleElements
+
             --// Always resize and keep visible (clean look)
             DepGroupbox:Resize()
             DepGroupbox.Holder.Visible = true
+        end
+    end
+
+    --// Auto-switch to first tab with matches if current tab has no matches
+    if Library.ActiveTab and TabMatchCounts[Library.ActiveTab] == 0 then
+        for _, CurrentTab in ipairs(Library.LastSearchTabs) do
+            if not CurrentTab.IsKeyTab and TabMatchCounts[CurrentTab] and TabMatchCounts[CurrentTab] > 0 then
+                CurrentTab:Show()
+                break
+            end
         end
     end
 end
