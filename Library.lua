@@ -5069,6 +5069,13 @@ function Library:SetNotifySide(Side: string)
 end
 
 function Library:Notify(...)
+    if shared and shared.cheat_client and shared.cheat_client.config and shared.cheat_client.config.notifications == false then
+        return
+    end
+    if getgenv and getgenv().Toggles and getgenv().Toggles.notifications and getgenv().Toggles.notifications.Value == false then
+        return
+    end
+
     local Data = {}
     local Info = select(1, ...)
 
