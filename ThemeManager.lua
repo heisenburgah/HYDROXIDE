@@ -36,7 +36,7 @@ end
 
 local ThemeManager = {}
 do
-    ThemeManager.Folder = "ObsidianLibSettings"
+    ThemeManager.Folder = "HYDROXIDELib"
     -- if not isfolder(ThemeManager.Folder) then makefolder(ThemeManager.Folder) end
 
     ThemeManager.Library = nil
@@ -45,7 +45,7 @@ do
         ["Default"] = {
             1,
             httpService:JSONDecode(
-                [[{"FontColor":"ffffff","MainColor":"191919","AccentColor":"7d55ff","BackgroundColor":"0f0f0f","OutlineColor":"282828"}]]
+                [[{"FontColor":"ffffff","MainColor":"242424","AccentColor":"db4467","BackgroundColor":"1c1c1c","OutlineColor":"373737"}]]
             ),
         },
         ["BBot"] = {
@@ -60,10 +60,10 @@ do
                 [[{"FontColor":"ffffff","MainColor":"1e1842","AccentColor":"c50754","BackgroundColor":"191335","OutlineColor":"3c355d"}]]
             ),
         },
-        ["Jester"] = {
+        ["Noob"] = {
             4,
             httpService:JSONDecode(
-                [[{"FontColor":"ffffff","MainColor":"242424","AccentColor":"db4467","BackgroundColor":"1c1c1c","OutlineColor":"373737"}]]
+                [[{"FontColor":"ffffff","MainColor":"191919","AccentColor":"7d55ff","BackgroundColor":"0f0f0f","OutlineColor":"282828"}]]
             ),
         },
         ["Mint"] = {
