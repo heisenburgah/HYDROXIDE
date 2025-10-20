@@ -196,6 +196,17 @@ function LoggerGui.new(cheat_client, utility)
 	local messages: {TextLabel} = {}
 
 	local currentPlayerFilter = "All"
+
+	-- Define updateSearch function early so it can be called by button handlers
+	local function updateSearch()
+		local query = searchBox.Text:lower()
+		for _, msgLabel in ipairs(messages) do
+			local matchesSearch = query == "" or msgLabel.Text:lower():find(query)
+			local matchesPlayer = currentPlayerFilter == "All" or msgLabel.Text:find("%[" .. currentPlayerFilter)
+			msgLabel.Visible = matchesSearch and matchesPlayer
+		end
+	end
+
 	local playerFilterButton = createButton("PlayerFilter", UDim2.new(0, 80, 0, 24), UDim2.new(0, 385, 0.5, -12), "All Players", Color3.fromRGB(40, 130, 255), 0.3)
 	playerFilterButton.Font = Enum.Font.Gotham
 	playerFilterButton.TextSize = 12
@@ -296,15 +307,6 @@ function LoggerGui.new(cheat_client, utility)
 		end
 	end)
 
-
-	local function updateSearch()
-		local query = searchBox.Text:lower()
-		for _, msgLabel in ipairs(messages) do
-			local matchesSearch = query == "" or msgLabel.Text:lower():find(query)
-			local matchesPlayer = currentPlayerFilter == "All" or msgLabel.Text:find("%[" .. currentPlayerFilter)
-			msgLabel.Visible = matchesSearch and matchesPlayer
-		end
-	end
 	local dragging = false
 	local dragStart = Vector2.new()
 	local startSize = mainFrame.Size
@@ -458,19 +460,24 @@ function LoggerGui.new(cheat_client, utility)
 
 	self.OriginalOnIncomingMessage = TextChatService.OnIncomingMessage
 	TextChatService.OnIncomingMessage = function(MessageData)
+		print("[Chat Logger] OnIncomingMessage triggered")
 		if MessageData.Status ~= Enum.TextChatMessageStatus.Success then
+			print("[Chat Logger] Message status not success:", MessageData.Status)
 			return
 		end
 		if not MessageData.TextSource then
+			print("[Chat Logger] No TextSource")
 			return
 		end
 
 		local player = Players:GetPlayerByUserId(MessageData.TextSource.UserId)
 		if not player then
+			print("[Chat Logger] Player not found for UserId:", MessageData.TextSource.UserId)
 			return
 		end
 
 		local message = MessageData.Text
+		print("[Chat Logger] Adding message from", player.Name, ":", message)
 		addMessage(player, message)
 	end
 
