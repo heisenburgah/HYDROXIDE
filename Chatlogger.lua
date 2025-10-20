@@ -1,3 +1,4 @@
+-- WAIT WHAT HYDROXIDE CHAT LOGGER OPENSOURCE??!!?!?!?!?!?!?!!?!!?!!?!!?!!?!!?!!?!!?!!!?!?!?!?!!?!!?!!?!!?!!?!!?!!?!!?
 local TextChatService = game:GetService("TextChatService")
 local Players = game:GetService("Players")
 local CoreGui: CoreGui = cloneref(game:GetService("CoreGui"))
