@@ -191,6 +191,9 @@ function LoggerGui.new(cheat_client, utility)
 	addCorner(searchBox, 6)
 	addStroke(searchBox, 1, 0.7)
 
+	-- Declare messages table early so button handlers can access it
+	local messages: {TextLabel} = {}
+
 	local currentPlayerFilter = "All"
 	local playerFilterButton = createButton("PlayerFilter", UDim2.new(0, 80, 0, 24), UDim2.new(0, 385, 0.5, -12), "All Players", Color3.fromRGB(40, 130, 255), 0.3)
 	playerFilterButton.Font = Enum.Font.Gotham
@@ -262,8 +265,6 @@ function LoggerGui.new(cheat_client, utility)
 	local saveButton = createButton("SaveButton", UDim2.new(0, 27, 0, 27), UDim2.new(1, -90, 0.5, -12), "S", Color3.fromRGB(40, 200, 40), 0.18)
 	saveButton.Parent = titleBar
 	addCorner(saveButton, 4)
-	 
-	local messages: {TextLabel} = {}
 
 	utility:Connection(saveButton.MouseButton1Click, function()
 		if not isfolder("HYDROXIDE/Chatlogs") then
