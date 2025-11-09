@@ -312,7 +312,6 @@ local Templates = {
     Dropdown = {
         Values = {},
         DisabledValues = {},
-        ValueColors = {},
         Multi = false,
         MaxVisibleDropdownItems = 8,
 
@@ -4028,7 +4027,6 @@ do
             Value = Info.Multi and {} or nil,
             Values = Info.Values,
             DisabledValues = Info.DisabledValues,
-            ValueColors = Info.ValueColors,
             Multi = Info.Multi,
 
             SpecialType = Info.SpecialType,
@@ -4230,14 +4228,12 @@ do
                 local IsDisabled = table.find(DisabledValues, Value)
                 local Table = {}
 
-                local ValueColor = Dropdown.ValueColors and Dropdown.ValueColors[Value]
                 local Button = New("TextButton", {
                     BackgroundColor3 = "MainColor",
                     BackgroundTransparency = 1,
                     LayoutOrder = IsDisabled and 1 or 0,
                     Size = UDim2.new(1, 0, 0, 21),
                     Text = tostring(Value),
-                    TextColor3 = ValueColor or "FontColor",
                     TextSize = 14,
                     TextTransparency = 0.5,
                     TextXAlignment = Enum.TextXAlignment.Left,
