@@ -1024,8 +1024,10 @@ function Library:SetDPIScale(DPIScale: number)
     end
 end
 
-function Library:GiveSignal(Connection: RBXScriptConnection)
-    table.insert(Library.Signals, Connection)
+function Library:GiveSignal(Connection: RBXScriptConnection | RBXScriptSignal)
+    if typeof(Connection) == "RBXScriptConnection" then
+        table.insert(Library.Signals, Connection)
+    end
     return Connection
 end
 
@@ -1880,7 +1882,9 @@ function Library:AddTooltip(InfoStr: string, DisabledInfoStr: string, HoverInsta
     function TooltipTable:Destroy()
         for Index = #TooltipTable.Signals, 1, -1 do
             local Connection = table.remove(TooltipTable.Signals, Index)
-            Connection:Disconnect()
+            if Connection and Connection.Connected then
+                Connection:Disconnect()
+            end
         end
 
         if CurrentHoverInstance == HoverInstance then
@@ -1899,10 +1903,12 @@ end
 function Library:Unload()
     for Index = #Library.Signals, 1, -1 do
         local Connection = table.remove(Library.Signals, Index)
-        Connection:Disconnect()
+        if Connection and Connection.Connected then
+            Connection:Disconnect()
+        end
     end
 
-    for _, Callback in pairs(Library.UnloadSignals) do
+    for _, Callback in Library.UnloadSignals do
         Library:SafeCallback(Callback)
     end
 
@@ -5009,6 +5015,14 @@ do
             Background.Size = UDim2.new(1, 0, 0, DepGroupboxList.AbsoluteContentSize.Y + 18 * Library.DPIScale)
         end
 
+        -- Auto-resize when content changes
+        DepGroupboxList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+            if not DepGroupbox.Visible then
+                return
+            end
+            DepGroupbox:Resize()
+        end)
+
         function DepGroupbox:Update(CancelSearch)
             for _, Dependency in pairs(DepGroupbox.Dependencies) do
                 local Element = Dependency[1]
@@ -5036,9 +5050,11 @@ do
             end
 
             DepGroupbox.Visible = true
+            Background.Visible = true
             if not Library.Searching then
-                Background.Visible = true
-                DepGroupbox:Resize()
+                task.defer(function()
+                    DepGroupbox:Resize()
+                end)
             elseif not CancelSearch then
                 Library:UpdateSearch(Library.SearchText)
             end
@@ -6127,9 +6143,16 @@ function Library:CreateWindow(WindowInfo)
                 Background.Size = UDim2.new(1, 0, 0, GroupboxList.AbsoluteContentSize.Y + 53 * Library.DPIScale)
             end
 
+            -- Auto-resize when content changes
+            GroupboxList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+                Groupbox:Resize()
+            end)
+
             setmetatable(Groupbox, BaseGroupbox)
 
-            Groupbox:Resize()
+            task.defer(function()
+                Groupbox:Resize()
+            end)
             Tab.Groupboxes[Info.Name] = Groupbox
 
             return Groupbox
