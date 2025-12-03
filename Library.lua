@@ -3691,7 +3691,7 @@ do
             end
 
             if Input.Numeric then
-                if #Text > 0 and not tonumber(Text) then
+                if #tostring(Text) > 0 and not tonumber(Text) then
                     Text = Input.Value
                 end
             end
@@ -5417,13 +5417,14 @@ function Library:CreateWindow(WindowInfo)
             Size = false,
         })
 
-        MainFrame = New("Frame", {
+        MainFrame = New("TextButton", {
             BackgroundColor3 = function()
                 return Library:GetBetterColor(Library.Scheme.BackgroundColor, -1)
             end,
             Name = "Main",
             Position = WindowInfo.Position,
             Size = WindowInfo.Size,
+            Text = "",
             Visible = false,
             Parent = ScreenGui,
 
@@ -6360,7 +6361,7 @@ function Library:CreateWindow(WindowInfo)
 
             if Description then
                 CurrentTabInfo.Visible = true
-                
+
 
                 CurrentTabLabel.Text = Name
                 CurrentTabDescription.Text = Description
@@ -6369,6 +6370,10 @@ function Library:CreateWindow(WindowInfo)
             TabContainer.Visible = true
 
             Library.ActiveTab = Tab
+
+            if Library.Searching then
+                Library:UpdateSearch(Library.SearchText)
+            end
         end
 
         function Tab:Hide()
