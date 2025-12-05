@@ -45,7 +45,7 @@ do
         ["Default"] = {
             1,
             httpService:JSONDecode(
-                [[{"FontColor":"ffffff","MainColor":"242424","AccentColor":"db4467","BackgroundColor":"1c1c1c","OutlineColor":"373737"}]]
+                [[{"MainColor":"212121","FontFace":"Code","AccentColor":"00f0ff","OutlineColor":"383838","BackgroundColor":"151515","FontColor":"eeffff"}]]
             ),
         },
         ["BBot"] = {
