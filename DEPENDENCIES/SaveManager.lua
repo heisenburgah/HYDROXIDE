@@ -43,6 +43,7 @@ local SaveManager = {} do
     SaveManager.SubFolder = ""
     SaveManager.Ignore = {}
     SaveManager.Library = nil
+    SaveManager.CurrentConfig = nil
     SaveManager.Parser = {
         Toggle = {
             Save = function(idx, object)
@@ -256,6 +257,11 @@ local SaveManager = {} do
             if self.Ignore[option.idx] then continue end
 
             task.spawn(self.Parser[option.type].Load, option.idx, option) -- task.spawn() so the config loading wont get stuck.
+        end
+
+        self.CurrentConfig = name
+        if self.OnConfigLoaded then
+            self.OnConfigLoaded(name)
         end
 
         return true
