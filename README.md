@@ -1,6 +1,6 @@
 # Hydroxide
 
-A comprehensive Roblox utility suite for Rogue Lineage, Deepwoken, and Rogue Lineage Battlegrounds. ~50,000 lines of Lua across three game modules.
+A comprehensive Roblox utility suite for Rogue Lineage and Rogue Lineage Battlegrounds. ~41,000 lines of Lua across two game modules.
 
 **This project is now open source and discontinued. No updates, fixes, or support will be provided. Fork freely.**
 
@@ -12,7 +12,6 @@ A comprehensive Roblox utility suite for Rogue Lineage, Deepwoken, and Rogue Lin
 |------|--------|-------|
 | Rogue Lineage | `ROGUE/rogue_ui.lua` | ~27,000 |
 | Rogue Lineage Battlegrounds | `ROGUE_BATTLEGROUNDS/rlb.lua` | ~14,000 |
-| Deepwoken | `DEEPWOKEN/deep_ui.lua` | ~7,400 |
 
 ---
 
@@ -82,33 +81,6 @@ PvP-focused module inheriting Rogue Lineage's combat systems, optimized for aren
 - Full macro system with save/load
 - Auto Dialogue, Auto Bard, Anti AFK
 - Config management with server join utilities
-
----
-
-## Deepwoken
-
-Streamlined module for Deepwoken's PvE and PvP gameplay.
-
-### Combat
-- Silent Aim with FOV control
-- No Stun
-
-### Visuals
-- Player ESP (Name, Box, Health, Tags, Intent, Hover Details)
-- All chams variants with pulse and occlusion
-- Mob ESP, NPC ESP, Ingredient ESP
-- Healthview
-
-### World & Movement
-- Freecam with speed control
-- Flight, Noclip, Better Flight
-- Fullbright, No Fog, Time control
-- No Kill Bricks, No Fall Damage, No Textures
-
-### Automation
-- Auto Trinket, Auto Ingredient pickup
-- Anti AFK
-- Proximity Notifier with ally ignore
 
 ---
 
