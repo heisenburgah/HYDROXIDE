@@ -1,0 +1,8 @@
+*
+!README.md
+!LICENSE
+!.gitignore
+!ROGUE/
+!ROGUE/rogue_ui.lua
+!ROGUE_BATTLEGROUNDS/
+!ROGUE_BATTLEGROUNDS/rlb.lua
