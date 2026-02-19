@@ -1,10 +1,10 @@
 # Hydroxide
 
-[![GitHub last commit](https://img.shields.io/github/last-commit/heisenburgah/HYDROXIDE)](https://github.com/heisenburgah/HYDROXIDE/commits)
-[![GitHub downloads](https://img.shields.io/github/downloads/heisenburgah/HYDROXIDE/total)](https://github.com/heisenburgah/HYDROXIDE/releases)
-[![Discord](https://img.shields.io/discord/819956523479334933?label=Discord&logo=discord&logoColor=white)](https://discord.gg/tu9JKPqbNR)
-[![GitHub stars](https://img.shields.io/github/stars/heisenburgah/HYDROXIDE)](https://github.com/heisenburgah/HYDROXIDE/stargazers)
-[![License](https://img.shields.io/github/license/heisenburgah/HYDROXIDE)](LICENSE)
+![](https://img.shields.io/github/last-commit/heisenburgah/HYDROXIDE?style=flat-square)
+![](https://img.shields.io/tokei/lines/github/heisenburgah/HYDROXIDE?style=flat-square)
+![](https://img.shields.io/github/languages/code-size/heisenburgah/HYDROXIDE?style=flat-square)
+![](https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square)
+![](https://img.shields.io/discord/819956523479334933?style=flat-square)
 
 A comprehensive Roblox utility suite for Rogue Lineage and Rogue Lineage Battlegrounds. ~41,000 lines of Lua across two game modules.
 
