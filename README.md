@@ -88,6 +88,19 @@ PvP-focused module inheriting Rogue Lineage's combat systems, optimized for aren
 
 ---
 
+## Usage
+
+```lua
+print("Hydroxide")
+
+pcall(function()
+    loadstring(game:HttpGet(
+        "https://raw.githubusercontent.com/heisenburgah/HYDROXIDE/main/ROGUE/rogue_ui.lua",
+        true
+    ))()
+end)
+```
+
 ## Project Structure
 
 ```
@@ -96,6 +109,11 @@ Hydroxide/
     rogue_ui.lua              -- Main Rogue Lineage script (~27,000 lines)
   ROGUE_BATTLEGROUNDS/
     rlb.lua                   -- Rogue Battlegrounds script (~14,000 lines)
+  DEPENDENCIES/
+    Library.lua               -- UI framework
+    SaveManager.lua           -- Config save/load
+    ThemeManager.lua          -- UI theming
+    Chatlogger.lua            -- Chat logging module
 ```
 
 ## Stella - Community Data Collection
