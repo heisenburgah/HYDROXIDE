@@ -161,3 +161,9 @@ If you are distributing a custom version of Hydroxide or a mod with ported featu
 ---
 
 *Development is slowed but not dead. Feel free to open issues, submit PRs, or fork and build your own version.*
+
+---
+
+## Acknowledgements
+
+Repository setup and maintenance assisted by [Claude Code](https://claude.ai/claude-code).
