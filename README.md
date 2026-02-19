@@ -2,6 +2,8 @@
 
 A comprehensive Roblox utility suite for Rogue Lineage and Rogue Lineage Battlegrounds. ~41,000 lines of Lua across two game modules.
 
+**Website:** [hydroxide.solutions](https://hydroxide.solutions) | **Discord:** [discord.gg/tu9JKPqbNR](https://discord.gg/tu9JKPqbNR)
+
 **This project is now open source and discontinued. No updates, fixes, or support will be provided. Fork freely.**
 
 ---
@@ -111,7 +113,9 @@ Hydroxide includes a lightweight data collection snippet that runs on startup an
 
 ## License
 
-MIT License. See [LICENSE](LICENSE) for details.
+This project is licensed under the [GNU General Public License v3.0](LICENSE).
+
+If you are distributing a custom version of Hydroxide or a mod with ported features of Hydroxide, you are required to disclose the source code, state changes, use a compatible license, and follow the license terms.
 
 ---
 
