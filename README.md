@@ -166,4 +166,4 @@ If you are distributing a custom version of Hydroxide or a mod with ported featu
 
 ## Acknowledgements
 
-Repository setup and maintenance assisted by [Claude Code](https://claude.ai/claude-code).
+Repository setup assisted by [Claude Code](https://claude.ai/claude-code).
