@@ -3105,7 +3105,7 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
     
     local repo = "https://raw.githubusercontent.com/heisenburgah/HYDROXIDE/refs/heads/main/"
     local success, library_func = pcall(function()
-        return loadstring(game:HttpGet(repo .. "Library.lua"))()
+        return loadstring(game:HttpGet(repo .. "DEPENDENCIES/Library.lua"))()
     end)
 
     if success then
@@ -3116,8 +3116,8 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
         getgenv().Options = library.Options or {}
         getgenv().Labels = library.Labels or {}
 
-        local SaveManager = loadstring(game:HttpGet(repo .. "SaveManager.lua"))()
-        local ThemeManager = loadstring(game:HttpGet(repo .. "ThemeManager.lua"))()
+        local SaveManager = loadstring(game:HttpGet(repo .. "DEPENDENCIES/SaveManager.lua"))()
+        local ThemeManager = loadstring(game:HttpGet(repo .. "DEPENDENCIES/ThemeManager.lua"))()
 
         SaveManager:SetLibrary(library)
         ThemeManager:SetLibrary(library)
@@ -13884,7 +13884,7 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
                     Callback = function(state)
                         if state then
                             local success, result = pcall(function()
-                                local LoggerGui = loadstring(game:HttpGet(repo .. "Chatlogger.lua"))()
+                                local LoggerGui = loadstring(game:HttpGet(repo .. "DEPENDENCIES/Chatlogger.lua"))()
                                 return LoggerGui.new(cheat_client, utility)
                             end)
 
