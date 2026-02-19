@@ -5,7 +5,8 @@
 ![](https://img.shields.io/tokei/lines/github/heisenburgah/HYDROXIDE?style=flat-square)
 ![](https://img.shields.io/github/languages/code-size/heisenburgah/HYDROXIDE?style=flat-square)
 ![](https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square)
-![](https://img.shields.io/discord/819956523479334933?style=flat-square)
+![](https://img.shields.io/discord/819956523479334933?style=flat-square&cacheSeconds=0)
+![](https://hits.sh/github.com/heisenburgah/HYDROXIDE.svg?style=flat-square&label=views)
 
 A comprehensive Roblox utility suite for Rogue Lineage and Rogue Lineage Battlegrounds. ~41,000 lines of Lua across two game modules.
 
