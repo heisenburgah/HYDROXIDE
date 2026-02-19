@@ -6,6 +6,8 @@ A comprehensive Roblox utility suite for Rogue Lineage and Rogue Lineage Battleg
 
 **This project is now open source and discontinued. No updates, fixes, or support will be provided. Fork freely.**
 
+**Fair warning:** The code is pretty sloppy and badly organized. Single files with tens of thousands of lines, no modular structure, and inconsistent patterns throughout. It was never written to be maintainable or readable by anyone else. Good luck.
+
 ---
 
 ## Games Supported
