@@ -261,7 +261,7 @@ local SaveManager = {} do
 
         self.CurrentConfig = name
         if self.OnConfigLoaded then
-            self.OnConfigLoaded(name)
+            task.defer(self.OnConfigLoaded, name)
         end
 
         return true
