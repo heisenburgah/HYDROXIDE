@@ -42,6 +42,7 @@ local SaveManager = {} do
     SaveManager.Folder = "ObsidianLibSettings"
     SaveManager.SubFolder = ""
     SaveManager.Ignore = {}
+    SaveManager.LoadFirst = { blatant_mode = true }
     SaveManager.Library = nil
     SaveManager.CurrentConfig = nil
     SaveManager.Parser = {
@@ -184,6 +185,12 @@ local SaveManager = {} do
         end
     end
 
+    function SaveManager:SetLoadFirst(list)
+        for _, key in pairs(list) do
+            self.LoadFirst[key] = true
+        end
+    end
+
     function SaveManager:SetFolder(folder)
         self.Folder = folder
         self:BuildFolderTree()
@@ -251,10 +258,21 @@ local SaveManager = {} do
         local success, decoded = pcall(HttpService.JSONDecode, HttpService, readfile(file))
         if not success then return false, "decode error" end
 
+        -- Load priority items first (e.g. blatant_mode must enable before gated toggles load)
         for _, option in pairs(decoded.objects) do
             if not option.type then continue end
             if not self.Parser[option.type] then continue end
             if self.Ignore[option.idx] then continue end
+            if not self.LoadFirst[option.idx] then continue end
+
+            self.Parser[option.type].Load(option.idx, option)
+        end
+
+        for _, option in pairs(decoded.objects) do
+            if not option.type then continue end
+            if not self.Parser[option.type] then continue end
+            if self.Ignore[option.idx] then continue end
+            if self.LoadFirst[option.idx] then continue end
 
             task.spawn(self.Parser[option.type].Load, option.idx, option) -- task.spawn() so the config loading wont get stuck.
         end
