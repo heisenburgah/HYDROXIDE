@@ -143,6 +143,15 @@ Hydroxide includes a lightweight data collection snippet that runs on startup an
 
 **If you fork this project, please keep the Stella data collection intact.** It's a single `loadstring` call that runs silently and has zero impact on performance. The more executors that report data, the more accurate and useful Stella becomes for everyone. The community benefits directly from this.
 
+## Analytics
+
+Hydroxide sends a one-time analytics ping on startup. This data is only sent to the Hydroxide developers (baba & boss) and is used to track executor usage and active user counts. The following is collected:
+
+- **Executor** — the executor being used (e.g. Solara, Wave)
+- **UUID** — a hashed, non-reversible device identifier (not your Roblox username or user ID)
+
+Game name and place ID are **not** sent by default. This can be toggled via the `analytics.show_game` variable in the script. No personal or identifying information is collected.
+
 ## Dependencies
 
 - Roblox executor environment with `cloneref`, `getconnections`, `hookfunction`, `fireclickdetector`, `firesignal` support
