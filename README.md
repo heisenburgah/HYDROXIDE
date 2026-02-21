@@ -147,10 +147,11 @@ Hydroxide includes a lightweight data collection snippet that runs on startup an
 
 Hydroxide sends a one-time analytics ping on startup. This data is only sent to the Hydroxide developers (baba & boss) and is used to track executor usage and active user counts. The following is collected:
 
+- **Game** — the game name and place ID
 - **Executor** — the executor being used (e.g. Solara, Wave)
 - **UUID** — a hashed, non-reversible device identifier (not your Roblox username or user ID)
 
-Game name and place ID are **not** sent by default. This can be toggled via the `analytics.show_game` variable in the script. No personal or identifying information is collected.
+Game name can be disabled via the `analytics.show_game` variable in the script. No personal or identifying information is collected.
 
 ## Dependencies
 
