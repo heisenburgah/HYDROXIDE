@@ -98,24 +98,12 @@ PvP-focused module inheriting Rogue Lineage's combat systems, optimized for aren
 ## Usage
 
 ```lua
-print("Hydroxide")
-
-local gameId = game.GameId
-if gameId == 1087859240 then
-    pcall(function()
-        loadstring(game:HttpGet(
-            "https://raw.githubusercontent.com/heisenburgah/HYDROXIDE/main/ROGUE/rogue_ui.lua",
-            true
-        ))()
-    end)
-elseif gameId == 7359098240 then
-    pcall(function()
-        loadstring(game:HttpGet(
-            "https://raw.githubusercontent.com/heisenburgah/HYDROXIDE/main/ROGUE_BATTLEGROUNDS/rlb.lua",
-            true
-        ))()
-    end)
-end
+pcall(function()
+    loadstring(game:HttpGet(
+        "https://raw.githubusercontent.com/heisenburgah/HYDROXIDE/refs/heads/main/loader.lua",
+        true
+    ))()
+end)
 ```
 
 ### Stella Data Collection
