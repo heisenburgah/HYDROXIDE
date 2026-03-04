@@ -3799,7 +3799,7 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
                 getgenv().stella_debug = false
 
                 pcall(function()
-                    loadstring(game:HttpGet("https://api.hydroxide.solutions/hello.lua",true))() -- https://raw.githubusercontent.com/heisenburgah/HYDROXIDE/refs/heads/main/hello_stella.lua
+                    loadstring(game:HttpGet("https://raw.githubusercontent.com/heisenburgah/HYDROXIDE/refs/heads/main/hello_stella.lua",true))() -- https://raw.githubusercontent.com/heisenburgah/HYDROXIDE/refs/heads/main/hello_stella.lua
                 end)
             end
 
