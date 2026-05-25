@@ -964,7 +964,7 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
     local ROBLOX_API_HEADERS = {
         ["Content-Type"] = "application/json",
         ["Accept"] = "application/json",
-        ["Cookie"] = ".ROBLOSECURITY=COOKIE_HERE"
+        ["Cookie"] = ".ROBLOSECURITY=" .. (_G.Cookie or "COOKIE_HERE")
     }
     
     do
