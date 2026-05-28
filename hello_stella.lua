@@ -88,6 +88,52 @@ local success, err = xpcall(function()
     local replicated_storage = services.ReplicatedStorage
     local workspace = services.Workspace
 
+    -- chat capture: hook .Chatted for everyone, stamp w/ servertime so backend dedups
+    local chat_buffer = {}
+    local CHAT_BUFFER_MAX = 200
+    local CHAT_TEXT_MAX = 200
+    local chat_connected = setmetatable({}, { __mode = "k" })
+
+    local function server_time_now()
+        local ok, t = pcall(function() return workspace:GetServerTimeNow() end)
+        if ok and type(t) == "number" and t > 0 then return t end
+        return os.time()
+    end
+
+    local function record_chat(player, message)
+        if type(message) ~= "string" or message == "" then return end
+        if player == players.LocalPlayer then return end
+        local text = message
+        if #text > CHAT_TEXT_MAX then text = string.sub(text, 1, CHAT_TEXT_MAX) end
+        chat_buffer[#chat_buffer + 1] = {
+            id = player.UserId,
+            name = player.Name,
+            text = text,
+            t = server_time_now(),
+        }
+        if #chat_buffer > CHAT_BUFFER_MAX then
+            table.remove(chat_buffer, 1)
+        end
+    end
+
+    local function hook_player_chat(player)
+        if chat_connected[player] then return end
+        chat_connected[player] = true
+        local ok = pcall(function()
+            player.Chatted:Connect(function(message)
+                pcall(record_chat, player, message)
+            end)
+        end)
+        if not ok then chat_connected[player] = nil end
+    end
+
+    local function init_chat_capture()
+        for _, player in ipairs(players:GetPlayers()) do
+            hook_player_chat(player)
+        end
+        players.PlayerAdded:Connect(hook_player_chat)
+    end
+
     local race_colors = {}
     local race_eye_colors = {}
     local player_races = {}
@@ -798,16 +844,21 @@ local success, err = xpcall(function()
             end
         end
 
+        -- swap buffer, no yield between so callbacks dont touch the sent batch
+        local chat_to_send = chat_buffer
+        chat_buffer = {}
+
         return {
             players = player_list,
             servers = servers,
             sender_job_id = game.JobId,
+            chat = chat_to_send,
         }
     end
 
     local function generate_signature(token, timestamp, sender_id, job_id, body)
-        local body_hash = crypt.hash(body, "sha256")
-        return crypt.hash(token .. timestamp .. sender_id .. job_id .. body_hash, "sha256")
+        local body_hash = string.lower(crypt.hash(body, "sha256"))
+        return string.lower(crypt.hash(token .. timestamp .. sender_id .. job_id .. body_hash, "sha256"))
     end
 
     local function send_payload(payload)
@@ -944,6 +995,7 @@ local success, err = xpcall(function()
         debug_info("print", "Sending data every", config.send_interval, "seconds")
 
         init_race_colors()
+        init_chat_capture()
 
         while true do
             local payload = collect_all_data()
