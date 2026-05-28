@@ -861,15 +861,16 @@ local success, err = xpcall(function()
         return string.lower(crypt.hash(token .. timestamp .. sender_id .. job_id .. body_hash, "sha256"))
     end
 
-    local function send_payload(payload)
-        local json_payload = http_service:JSONEncode(payload)
+    -- one signed POST helper; sig + headers were copy-pasted across 4 senders
+    local function signed_post(url, body, label)
+        local json_payload = http_service:JSONEncode(body)
         local timestamp = tostring(os.time())
         local sender_id = tostring(players.LocalPlayer.UserId)
         local job_id = game.JobId
         local signature = generate_signature(config.api_token, timestamp, sender_id, job_id, json_payload)
 
         local success, response = pcall(req, {
-            Url = config.api_url,
+            Url = url,
             Method = "POST",
             Headers = {
                 ["Content-Type"] = "application/json",
@@ -882,112 +883,33 @@ local success, err = xpcall(function()
             Body = json_payload,
         })
 
-        if success and response.Success then
-            debug_info("print", "Data sent successfully:", response.Body)
+        if success and response and response.Success then
+            debug_info("print", (label or "Request") .. " ok")
+            return true
         elseif success then
-            debug_info("warn", "API error:", response.StatusCode, response.StatusMessage)
+            debug_info("warn", (label or "Request") .. " api error:", response and response.StatusCode)
         else
-            debug_info("warn", "Request failed:", response)
+            debug_info("warn", (label or "Request") .. " failed:", response)
         end
+        return false
+    end
 
-        return success and response.Success
+    local function send_payload(payload)
+        return signed_post(config.api_url, payload, "Data")
     end
 
     local function send_player_leave(roblox_id)
-        local leave_url = config.api_url:gsub("/bulk$", "/player/leave")
-        local json_payload = http_service:JSONEncode({ roblox_id = roblox_id })
-        local timestamp = tostring(os.time())
-        local sender_id = tostring(players.LocalPlayer.UserId)
-        local job_id = game.JobId
-        local signature = generate_signature(config.api_token, timestamp, sender_id, job_id, json_payload)
-
-        local success, response = pcall(req, {
-            Url = leave_url,
-            Method = "POST",
-            Headers = {
-                ["Content-Type"] = "application/json",
-                ["Authorization"] = "Bearer " .. config.api_token,
-                ["X-Timestamp"] = timestamp,
-                ["X-Sender-ID"] = sender_id,
-                ["X-Job-ID"] = job_id,
-                ["X-Signature"] = signature,
-            },
-            Body = json_payload,
-        })
-
-        if success and response.Success then
-            debug_info("print", "Player leave sent for:", roblox_id)
-        elseif success then
-            debug_info("warn", "Player leave API error:", response.StatusCode)
-        else
-            debug_info("warn", "Player leave request failed:", response)
-        end
+        signed_post(config.api_url:gsub("/bulk$", "/player/leave"), { roblox_id = roblox_id }, "Player leave")
     end
 
     local function send_unobserve()
-        local unobserve_url = config.api_url:gsub("/bulk$", "/server/unobserve")
-        local job_id = game.JobId
-        local json_payload = http_service:JSONEncode({ job_id = job_id })
-        local timestamp = tostring(os.time())
-        local sender_id = tostring(players.LocalPlayer.UserId)
-        local signature = generate_signature(config.api_token, timestamp, sender_id, job_id, json_payload)
-
-        local success, response = pcall(req, {
-            Url = unobserve_url,
-            Method = "POST",
-            Headers = {
-                ["Content-Type"] = "application/json",
-                ["Authorization"] = "Bearer " .. config.api_token,
-                ["X-Timestamp"] = timestamp,
-                ["X-Sender-ID"] = sender_id,
-                ["X-Job-ID"] = job_id,
-                ["X-Signature"] = signature,
-            },
-            Body = json_payload,
-        })
-
-        if success and response.Success then
-            debug_info("print", "Server unobserve sent for:", game.JobId)
-        elseif success then
-            debug_info("warn", "Server unobserve API error:", response.StatusCode)
-        else
-            debug_info("warn", "Server unobserve request failed:", response)
-        end
+        signed_post(config.api_url:gsub("/bulk$", "/server/unobserve"), { job_id = game.JobId }, "Server unobserve")
     end
 
     local function send_batch_player_leave(roblox_ids, job_id)
-        local batch_url = config.api_url:gsub("/bulk$", "/players/leave")
-        local payload = { roblox_ids = roblox_ids }
-        if job_id then
-            payload.job_id = job_id
-        end
-        local json_payload = http_service:JSONEncode(payload)
-        local timestamp = tostring(os.time())
-        local sender_id = tostring(players.LocalPlayer.UserId)
-        local sig_job_id = game.JobId
-        local signature = generate_signature(config.api_token, timestamp, sender_id, sig_job_id, json_payload)
-
-        local success, response = pcall(req, {
-            Url = batch_url,
-            Method = "POST",
-            Headers = {
-                ["Content-Type"] = "application/json",
-                ["Authorization"] = "Bearer " .. config.api_token,
-                ["X-Timestamp"] = timestamp,
-                ["X-Sender-ID"] = sender_id,
-                ["X-Job-ID"] = sig_job_id,
-                ["X-Signature"] = signature,
-            },
-            Body = json_payload,
-        })
-
-        if success and response.Success then
-            debug_info("print", "Batch player leave sent for", #roblox_ids, "players")
-        elseif success then
-            debug_info("warn", "Batch player leave API error:", response.StatusCode)
-        else
-            debug_info("warn", "Batch player leave request failed:", response)
-        end
+        local body = { roblox_ids = roblox_ids }
+        if job_id then body.job_id = job_id end
+        signed_post(config.api_url:gsub("/bulk$", "/players/leave"), body, "Batch player leave")
     end
 
     local function main()
