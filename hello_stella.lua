@@ -1,11 +1,12 @@
 -- // hydroxide.solutions PROPIETRARRY code?????
+-- // whoever reads this, https://www.youtube.com/watch?v=j50ZssEojtM this rap is lowk fire and i found it when i was trying to find rappers from Montana and this one just totally slaps!!! - baba zyu
 
 --[[
 getgenv().stella_token = "the_token_here"
 getgenv().stella_debug = false  -- optional, enables debug logging
 
 pcall(function()
-    loadstring(game:HttpGet("https://api.hydroxide.solutions/hello.lua",true))()
+    loadstring(game:HttpGet("https://stella.heroinhound.cc/stella.lua",true))() -- old url: https://api.hydroxide.solutions/hello.lua
 end)
 --]]
 
@@ -52,7 +53,8 @@ local success, err = xpcall(function()
     local config = {
         api_url = "https://stella.heroinhound.cc/api/bulk",
         api_token = user_token,
-        send_interval = 35,
+        send_interval = 35,       -- data payload sends
+        chat_flush_interval = 10, -- chat only flush
         api_fetch_interval = 300, -- seconds between Roblox API server list fetches
 
         debug = user_debug,
@@ -102,7 +104,6 @@ local success, err = xpcall(function()
 
     local function record_chat(player, message)
         if type(message) ~= "string" or message == "" then return end
-        if player == players.LocalPlayer then return end
         local text = message
         if #text > CHAT_TEXT_MAX then text = string.sub(text, 1, CHAT_TEXT_MAX) end
         chat_buffer[#chat_buffer + 1] = {
@@ -751,27 +752,19 @@ local success, err = xpcall(function()
     local function collect_all_data()
         local player_list = {}
         local current_player_list = {}
-        local local_player = players.LocalPlayer
 
         for _, player in ipairs(players:GetPlayers()) do
-            if player == local_player then
-                continue
-            end
-
             local success, player_data = pcall(get_player_data, player)
             if success and player_data then
                 table.insert(player_list, player_data)
-                table.insert(current_player_list, {
-                    name = player.Name,
-                    id = player.UserId
-                })
-            else
+            elseif not success then
+                -- nil = no character
                 debug_info("warn", "Failed to collect data for player:", player.Name, "| Error:", tostring(player_data))
-                table.insert(current_player_list, {
-                    name = player.Name,
-                    id = player.UserId
-                })
             end
+            table.insert(current_player_list, {
+                name = player.Name,
+                id = player.UserId
+            })
         end
 
         local success, servers = pcall(get_all_servers)
@@ -844,15 +837,10 @@ local success, err = xpcall(function()
             end
         end
 
-        -- swap buffer, no yield between so callbacks dont touch the sent batch
-        local chat_to_send = chat_buffer
-        chat_buffer = {}
-
         return {
             players = player_list,
             servers = servers,
             sender_job_id = game.JobId,
-            chat = chat_to_send,
         }
     end
 
@@ -898,6 +886,24 @@ local success, err = xpcall(function()
         return signed_post(config.api_url, payload, "Data")
     end
 
+    local function flush_chat()
+        if #chat_buffer == 0 then return end
+        local chat_to_send = chat_buffer
+        chat_buffer = {}
+        local ok = signed_post(config.api_url, {
+            sender_job_id = game.JobId,
+            chat = chat_to_send,
+        }, "Chat")
+        if not ok then
+            for _, m in ipairs(chat_to_send) do
+                chat_buffer[#chat_buffer + 1] = m
+            end
+            while #chat_buffer > CHAT_BUFFER_MAX do
+                table.remove(chat_buffer, 1)
+            end
+        end
+    end
+
     local function send_player_leave(roblox_id)
         signed_post(config.api_url:gsub("/bulk$", "/player/leave"), { roblox_id = roblox_id }, "Player leave")
     end
@@ -920,19 +926,36 @@ local success, err = xpcall(function()
         init_chat_capture()
 
         while true do
-            local payload = collect_all_data()
-            debug_info("print", "Collected", #payload.players, "players")
-            send_payload(payload)
+            -- guarding loop now
+            local ok, err = pcall(function()
+                local payload = collect_all_data()
+                debug_info("print", "Collected", #payload.players, "players")
+                send_payload(payload)
+            end)
+            if not ok then
+                debug_info("warn", "Collect/send cycle errored, retrying next tick:", tostring(err))
+            end
             task.wait(config.send_interval)
         end
     end
 
     task.spawn(main)
 
+    task.spawn(function()
+        while true do
+            task.wait(config.chat_flush_interval)
+            local ok, err = pcall(flush_chat)
+            if not ok then
+                debug_info("warn", "Chat flush errored, retrying next tick:", tostring(err))
+            end
+        end
+    end)
+
     players.PlayerAdded:Connect(function(player)
         task.wait(5)
-        local payload = collect_all_data()
-        send_payload(payload)
+        pcall(function()
+            send_payload(collect_all_data())
+        end)
     end)
 
     local server_leaving = false
@@ -943,7 +966,7 @@ local success, err = xpcall(function()
         end
 
         if player == players.LocalPlayer then
-            -- Leaving server: batch-clear all players + unobserve in one request
+            -- Leaving server: batch clear all players + unobserve in one request
             server_leaving = true
             local roblox_ids = {}
             for _, p in ipairs(players:GetPlayers()) do
@@ -953,14 +976,15 @@ local success, err = xpcall(function()
             return
         end
 
-        -- Normal single-player departure (skip if server is shutting down)
+        -- Normal single player departure (skip if server is shutting down)
         if server_leaving then return end
         task.spawn(function()
             send_player_leave(player.UserId)
         end)
         task.wait(1)
-        local payload = collect_all_data()
-        send_payload(payload)
+        pcall(function()
+            send_payload(collect_all_data())
+        end)
     end)
 end, function(err)
     return debug.traceback(err, 2)
