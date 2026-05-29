@@ -173,6 +173,35 @@ local success, err = xpcall(function()
         return success and result
     end
 
+    local function nearest_race(target, list)
+        if not target then return nil end
+        local best, best_d = nil, math.huge
+        for _, v in next, list do
+            local c = v[1]
+            local ok, d = pcall(function()
+                return math.max(math.abs(target.R - c.R), math.abs(target.G - c.G), math.abs(target.B - c.B))
+            end)
+            if ok and d < best_d then best_d = d; best = v[2] end
+        end
+        if best and best_d <= 0.02 then return best end
+        return nil
+    end
+
+    -- register a race skin color plus its vampire (s*0.2) and blight/lich (s*0.4)
+    local function add_skin_color(color, name)
+        if not color then return end
+        table.insert(race_colors, { color, name })
+        local ok, h, s, v = pcall(function() return color:ToHSV() end)
+        if ok and h ~= nil then
+            table.insert(race_colors, { Color3.fromHSV(h, s * 0.2, v), name })
+            table.insert(race_colors, { Color3.fromHSV(h, s * 0.4, v), name })
+        end
+    end
+
+    local function color_race(name)
+        return name == "Navaran" and "LesserNavaran" or name
+    end
+
     local function init_race_colors()
         local info = replicated_storage:FindFirstChild("Info")
         if not info then return end
@@ -183,20 +212,16 @@ local success, err = xpcall(function()
         for _, race_category in next, races:GetChildren() do
             if not race_category:IsA("Folder") then continue end
 
+            local name = color_race(race_category.Name)
+
             local direct_skin_color = race_category:FindFirstChild("SkinColor")
             if direct_skin_color and direct_skin_color:IsA("Color3Value") then
-                table.insert(race_colors, {
-                    direct_skin_color.Value,
-                    race_category.Name
-                })
+                add_skin_color(direct_skin_color.Value, name)
             end
 
             local direct_eye_color = race_category:FindFirstChild("EyeColor")
             if direct_eye_color and direct_eye_color:IsA("Color3Value") then
-                table.insert(race_eye_colors, {
-                    direct_eye_color.Value,
-                    race_category.Name
-                })
+                table.insert(race_eye_colors, { direct_eye_color.Value, name })
             end
 
             for _, race_variant in next, race_category:GetChildren() do
@@ -204,18 +229,12 @@ local success, err = xpcall(function()
 
                 local skin_color = race_variant:FindFirstChild("SkinColor")
                 if skin_color and skin_color:IsA("Color3Value") then
-                    table.insert(race_colors, {
-                        skin_color.Value,
-                        race_category.Name
-                    })
+                    add_skin_color(skin_color.Value, name)
                 end
 
                 local eye_color = race_variant:FindFirstChild("EyeColor")
                 if eye_color and eye_color:IsA("Color3Value") then
-                    table.insert(race_eye_colors, {
-                        eye_color.Value,
-                        race_variant.Name ~= race_category.Name and race_category.Name or race_category.Name
-                    })
+                    table.insert(race_eye_colors, { eye_color.Value, name })
                 end
             end
         end
@@ -330,13 +349,8 @@ local success, err = xpcall(function()
                 if race_found == "Unknown" then
                     local success, head_color = pcall(function() return head.Color end)
                     if success and head_color then
-                        for _, v in next, race_colors do
-                            local skin_color, race_name = v[1], v[2]
-                            if colors_match(head_color, skin_color) then
-                                race_found = race_name
-                                break
-                            end
-                        end
+                        local m = nearest_race(head_color, race_colors)
+                        if m then race_found = m end
                     end
                 end
             end
