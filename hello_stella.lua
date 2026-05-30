@@ -142,6 +142,7 @@ local success, err = xpcall(function()
     local race_colors = {}
     local race_eye_colors = {}
     local player_races = {}
+    local face_textures = {} -- decal texture id -> face name, built from Assets.Faces
 
     local race_tools = {
         ["Bloodline"] = "Haseldan",
@@ -244,6 +245,28 @@ local success, err = xpcall(function()
             Color3.fromRGB(111, 16, 158),
             "Cameo"
         })
+    end
+
+    local function init_face_map()
+        local assets = replicated_storage:FindFirstChild("Assets")
+        local faces = assets and assets:FindFirstChild("Faces")
+        if not faces then return end
+        for _, v in next, faces:GetDescendants() do
+            if v:IsA("Decal") then
+                local ok, tex = pcall(function() return v.Texture end)
+                if ok and tex and tex ~= "" then face_textures[tex] = v.Name end
+            end
+        end
+    end
+
+    local function get_player_face(player)
+        local character = player.Character
+        local head = character and character:FindFirstChild("Head")
+        local rl_face = head and head:FindFirstChild("RLFace")
+        if not rl_face then return nil end
+        local ok, tex = pcall(function() return rl_face.Texture end)
+        if ok and tex then return face_textures[tex] end
+        return nil
     end
 
     local function get_player_tools(player)
@@ -635,6 +658,7 @@ local success, err = xpcall(function()
             data.backpack_data = get_player_tools(player)
             data.edict_hint = get_edict_hint(player)
             data.race = get_player_race(player)
+            data.face = get_player_face(player)
             data.artifacts = get_player_artifact(player)
             data.dye = get_player_dye(player)
             data.blessings = get_player_blessings(player)
@@ -941,6 +965,7 @@ local success, err = xpcall(function()
         debug_info("print", "Sending data every", config.send_interval, "seconds")
 
         pcall(init_race_colors)
+        pcall(init_face_map)
         pcall(init_chat_capture)
 
         while true do
