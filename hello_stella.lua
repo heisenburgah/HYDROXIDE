@@ -797,14 +797,13 @@ local success, err = xpcall(function()
         local local_player = players.LocalPlayer
 
         for _, player in ipairs(players:GetPlayers()) do
-            if player == local_player then continue end
-
-            local success, player_data = pcall(get_player_data, player)
-            if success and player_data then
-                table.insert(player_list, player_data)
-            elseif not success then
-                -- nil = no character
-                debug_info("warn", "Failed to collect data for player:", player.Name, "| Error:", tostring(player_data))
+            if player ~= local_player then
+                local success, player_data = pcall(get_player_data, player)
+                if success and player_data then
+                    table.insert(player_list, player_data)
+                elseif not success then
+                    debug_info("warn", "Failed to collect data for player:", player.Name, "| Error:", tostring(player_data))
+                end
             end
             table.insert(current_player_list, {
                 name = player.Name,
