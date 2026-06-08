@@ -75,7 +75,7 @@ end)
 
 task.spawn(function()
     local a = Instance.new("Message", workspace)
-    a.Text = "u need 3 idol of war"
+    a.Text = "u need 2 idol of war"
     task.wait(3)
     a:Destroy()
 end)
