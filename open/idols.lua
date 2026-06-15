@@ -2,7 +2,7 @@ local cfg = getgenv().IdolConfig or {}
 local ITEM            = cfg.ITEM            or "Idol of War"
 local LOOP_INTERVAL   = cfg.LOOP_INTERVAL   or 0.6
 local USE_DELAY       = cfg.USE_DELAY       or 1.4
-local DEATH_DELAY     = cfg.DEATH_DELAY     or 0.05
+local DEATH_DELAY     = cfg.DEATH_DELAY     or 0.01
 local RESPAWN_TIMEOUT = cfg.RESPAWN_TIMEOUT or 30
 
 
@@ -11,6 +11,7 @@ local cloneref = cloneref or clonereference or function(instance) return instanc
 local cs   = cloneref(game:GetService("CollectionService"))
 local plr  = cloneref(game:GetService("Players")).LocalPlayer
 local rs   = cloneref(game:GetService("RunService"))
+local repsto = cloneref(game:GetService("ReplicatedStorage"))
 
 local vim = cloneref(game:GetService("VirtualInputManager"))
 local function clickIdol()
@@ -21,6 +22,26 @@ local function clickIdol()
             vim:SendMouseButtonEvent(0, 0, 0, false, game, 1)
         end)
     end
+end
+
+local function returnToMenu()
+    local requests = repsto:FindFirstChild("Requests")
+    local rtm = requests and requests:FindFirstChild("ReturnToMenu")
+    if rtm then
+        pcall(function() rtm:InvokeServer() end)
+    end
+end
+
+local function clickPlay()
+    local pg = plr:FindFirstChildOfClass("PlayerGui")
+    local menu = pg and pg:FindFirstChild("StartMenu")
+    local choices = menu and menu:FindFirstChild("Choices")
+    local play = choices and choices:FindFirstChild("Play")
+    if play and firesignal then
+        pcall(function() firesignal(play.MouseButton1Click) end)
+        return true
+    end
+    return false
 end
 
 local function runLoop()
@@ -36,15 +57,18 @@ local function runLoop()
                 task.wait(USE_DELAY)
                 if char:FindFirstChild(ITEM) then
                     clickIdol()
-                    task.wait(DEATH_DELAY)
-                    pcall(function() char:BreakJoints() end)
+                    task.wait(DEATH_DELAY + math.random(0, 6) / 1000)
+                    returnToMenu()
                     local waited = 0
-                    repeat
+                    while _G.abc and waited <= RESPAWN_TIMEOUT do
+                        local cur = plr.Character
+                        if cur and cur ~= char and cur:FindFirstChildOfClass("Humanoid") then
+                            break
+                        end
+                        clickPlay()
                         task.wait(0.5)
-                        waited = waited +  0.5
-                    until (not _G.abc)
-                        or waited > RESPAWN_TIMEOUT
-                        or (plr.Character and plr.Character ~= char and plr.Character:FindFirstChildOfClass("Humanoid"))
+                        waited = waited + 0.5
+                    end
                 end
             end
         end
@@ -103,10 +127,10 @@ stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.Thickness = 6
 stroke.Parent = label
 
-local function makeButton(text, posX, color)
+local function makeButton(text, posX, color, posY)
     local b = Instance.new("TextButton")
     b.Size = UDim2.new(0, 120, 0, 50)
-    b.Position = UDim2.new(0.5, posX, 0, 140)
+    b.Position = UDim2.new(0.5, posX, 0, posY or 140)
     b.Text = text
     b.TextScaled = true
     b.Font = Enum.Font.Cartoon
@@ -118,8 +142,9 @@ local function makeButton(text, posX, color)
     return b
 end
 
-local startBtn = makeButton("START", -130, Color3.fromRGB(0, 0, 255))
-local stopBtn  = makeButton("STOP",    10, Color3.fromRGB(255, 0, 0))
+local startBtn  = makeButton("START", -130, Color3.fromRGB(0, 0, 255))
+local stopBtn   = makeButton("STOP",    10, Color3.fromRGB(255, 0, 0))
+local unloadBtn = makeButton("UNLOAD",  -60, Color3.fromRGB(80, 80, 80), 200)
 
 local connection = nil
 
@@ -139,14 +164,24 @@ local function stopAnim()
     label.Rotation = 7
 end
 
-startBtn.MouseButton1Click:Connect(function()
+local startConn = startBtn.MouseButton1Click:Connect(function()
     if _G.abc then return end
     _G.abc = true
     startAnim()
     task.spawn(runLoop)
 end)
 
-stopBtn.MouseButton1Click:Connect(function()
+local stopConn = stopBtn.MouseButton1Click:Connect(function()
     _G.abc = false
     stopAnim()
+end)
+
+local unloadConn
+unloadConn = unloadBtn.MouseButton1Click:Connect(function()
+    _G.abc = nil
+    stopAnim()
+    if startConn then startConn:Disconnect() startConn = nil end
+    if stopConn then stopConn:Disconnect() stopConn = nil end
+    if unloadConn then unloadConn:Disconnect() unloadConn = nil end
+    screenGui:Destroy()
 end)
