@@ -4759,15 +4759,16 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
 
                     elseif (v:IsA('MeshPart') and v.MeshId == "rbxassetid://4103271893") then
                         return 'Candy', cheat_client.trinket_colors.event.Color, cheat_client.trinket_colors.event.ZIndex
-                    elseif v.ClassName == "UnionOperation" then
-                        local assetId = gethiddenproperty(v, "AssetId"):gsub("%%20", ""):match("%d+")
-                        if in_table(masks, assetId) then
-                            return "Scary Mask", cheat_client.trinket_colors.event.Color, cheat_client.trinket_colors.event.ZIndex
-                        end
-
-                    elseif (v.ClassName == 'UnionOperation' and gethiddenproperty(v, "AssetId"):gsub("%%20", ""):match("%d+") == "4117970107") then
-                        return 'Pumpkin Centerpiece', cheat_client.trinket_colors.event.Color, cheat_client.trinket_colors.event.ZIndex
-
+					elseif v.ClassName == "UnionOperation" then
+					    local assetId = gethiddenproperty(v, "AssetId"):gsub("%%20", ""):match("%d+")
+					
+					    if in_table(masks, assetId) then
+					        return "Scary Mask", cheat_client.trinket_colors.event.Color, cheat_client.trinket_colors.event.ZIndex
+					    elseif assetId == "4117970107" then
+					        return "Pumpkin Centerpiece", cheat_client.trinket_colors.event.Color, cheat_client.trinket_colors.event.ZIndex
+					    elseif assetId == "17590006505" then
+					        return "Idol of War", cheat_client.trinket_colors.event.Color, cheat_client.trinket_colors.event.ZIndex
+					    end
                         
                     elseif (FindFirstChild(v, 'Attachment') and FindFirstChildOfClass(v.Attachment, 'ParticleEmitter') and FindFirstChildOfClass(v.Attachment, 'ParticleEmitter').Rate == 5 and tostring(FindFirstChildOfClass(v.Attachment, 'ParticleEmitter').Color):split(" ")[3] ~= "0.8") then
                         local name = (game.PlaceId == 3541987450) and 'Phoenix Flower' or 'Azael Horn'
