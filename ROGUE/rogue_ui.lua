@@ -6971,7 +6971,7 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
                         if not (Toggles and Toggles.day_farm and Toggles.day_farm.Value) then return end
                         if no_kick() then return end
 
-                        if descendant:IsA("Tool") and (descendant.Name == "Perflora" or descendant.Name == "Pebble") then
+                        if descendant:IsA("Tool") and (descendant.Name == "Perflora" or descendant.Name == "Pebble" or descendant.Name == "Celeritas") then
                             local character = descendant.Parent
                             if character and character:IsA("Model") then
                                 local player = plrs:GetPlayerFromCharacter(character)
@@ -6986,7 +6986,7 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
                         for _, other_player in next, plrs:GetPlayers() do
                             if other_player ~= plr and other_player.Character then
                                 for _, tool in next, other_player.Character:GetChildren() do
-                                    if tool:IsA("Tool") and (tool.Name == "Perflora" or tool.Name == "Pebble") then
+                                    if tool:IsA("Tool") and (tool.Name == "Perflora" or tool.Name == "Pebble" or tool.Name == "Celeritas") then
                                         DayfarmServerhop(string.format("%s (%s) already has dangerous item: %s", other_player.Name, other_player.UserId, tool.Name))
                                         return
                                     end
@@ -16602,9 +16602,9 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
             group_trinket_bot:AddDropdown("EmergencyServerhopConditions", {
                 Text = "Emergency Serverhop Conditions",
                 Tooltip = "Select items that trigger instant serverhop when equipped by another player (no emergency gate)",
-                Values = {"Perflora", "Pebble"},
+                Values = {"Perflora", "Pebble", "Celeritas"},
                 Multi = true,
-                Default = {"Perflora", "Pebble"},
+                Default = {"Perflora", "Pebble", "Celeritas"},
                 Compact = true
             })
 
