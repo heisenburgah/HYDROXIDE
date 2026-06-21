@@ -19576,6 +19576,7 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
                 Default = cheat_client.config.blatant_mode,
                 Callback = function(state)
                     cheat_client.config.blatant_mode = state
+		            mem:SetItem("blatant", state)
 
                     local function updateBlatantFeature(featureName)
                         local toggle = Toggles[featureName]
@@ -20599,6 +20600,7 @@ if game.PlaceId == 3541987450 or game.PlaceId == 5208655184 or game.PlaceId == 1
                     end
 
                     if Toggles.blatant_mode then
+						mem:SetItem("blatant", "true")
                         Toggles.blatant_mode:SetValue(cheat_client.config.blatant_mode)
                     end
 
