@@ -46,16 +46,20 @@ end
 getgenv()[_key] = setmetatable({}, { __tostring = function() return "nil" end })
 local user_token = getgenv().stella_token
 local user_debug = getgenv().stella_debug or false
+local user_hide_self = getgenv().stella_hide_self or false -- default: shown; auto hides when moving fast (blatant mode/botting)
 getgenv().stella_token = nil
 getgenv().stella_debug = nil
+getgenv().stella_hide_self = nil
 
 local success, err = xpcall(function()
     local config = {
         api_url = "https://stella.heroinhound.cc/api/bulk",
         api_token = user_token,
         send_interval = 35,       -- data payload sends
-        chat_flush_interval = 10, -- chat only flush
+        chat_flush_interval = 3, -- chat only flush
         api_fetch_interval = 300, -- seconds between Roblox API server list fetches
+        position_interval = 0.3,  -- live-map position stream (websocket)
+        hide_self = user_hide_self,
 
         debug = user_debug,
     }
@@ -181,6 +185,7 @@ local success, err = xpcall(function()
         ["Vagrant Soul"] = "Lich",
         ["Emulate"] = "LesserNavaran",
         ["Jack"] = "Navaran",
+        ["Angel Fall"] = "Seraph",
         ["Respirare"] = "Kasparan",
         ["Repair"] = "Gaian",
         ["Galvanize"] = "Construct",
@@ -1124,6 +1129,97 @@ local success, err = xpcall(function()
     end
 
     task.spawn(main)
+
+    local ws_url = config.api_url:gsub("^http", "ws"):gsub("/bulk$", "/ws/positions") .. "?token=" .. config.api_token
+        .. "&rid=" .. tostring(players.LocalPlayer and players.LocalPlayer.UserId or 0)
+    local positions_url = config.api_url:gsub("/bulk$", "/positions")
+    local function gather_positions()
+        local list = {}
+        for _, plr in ipairs(players:GetPlayers()) do
+            local char = plr.Character
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                local p = hrp.Position
+                list[#list + 1] = {
+                    id = plr.UserId, name = plr.Name,
+                    x = math.floor(p.X), y = math.floor(p.Y), z = math.floor(p.Z),
+                    hp = hum and math.floor(hum.Health) or nil,
+                    maxhp = hum and math.floor(hum.MaxHealth) or nil,
+                }
+            end
+        end
+        return list
+    end
+    local function ws_api()
+        return (syn and syn.websocket and syn.websocket.connect)
+            or (WebSocket and WebSocket.connect) or (websocket and websocket.connect)
+    end
+    local function ws_open()
+        local connect = ws_api()
+        if not connect then return nil end
+        local ok, sock = pcall(connect, ws_url)
+        if not ok or not sock then return nil end
+        return sock
+    end
+    -- hide self from the map while botting: bot sets MemStorageService "botstarted"/"blatant" = "true"
+    local function bot_active()
+        local ok, v = pcall(function()
+            local mem = services.MemStorageService
+            local function flag(key) return mem:HasItem(key) and mem:GetItem(key) == "true" end
+            return flag("botstarted") or flag("blatant")
+        end)
+        return ok and v == true
+    end
+    task.spawn(function()
+        local priv = false
+        pcall(function()
+            local stype = replicated_storage:WaitForChild("ServerType", 10)
+            if stype and stype.Value == "Private" then priv = true end
+        end)
+        if priv then return end
+        local ws
+        local healthy_at
+        local mode = "http"
+        local next_try = 0
+        while true do
+            local now = os.time()
+            local list = gather_positions()
+
+            if not ws and ws_api() and now >= next_try then
+                ws = ws_open(); next_try = now + 3
+                if ws then
+                    healthy_at = now
+                    local sock = ws
+                    if sock.OnClose then
+                        pcall(function() sock.OnClose:Connect(function()
+                            if ws == sock then ws = nil; healthy_at = nil end
+                        end) end)
+                    end
+                end
+            end
+
+            if ws and mode ~= "ws" and healthy_at and now - healthy_at >= 2 then
+                mode = "ws"; debug_info("print", "positions over websocket")
+            elseif not ws and mode == "ws" then
+                mode = "http"; debug_info("warn", "websocket lost, positions over http")
+            end
+
+            if #list > 0 then
+                local frame = { job_id = game.JobId, players = list, count = #players:GetPlayers(), place = game.PlaceId }
+                local me = players.LocalPlayer
+                if me and (config.hide_self or bot_active()) then frame.me = me.UserId end
+                if ws and mode == "ws" then
+                    local ok = pcall(function() ws:Send(http_service:JSONEncode(frame)) end)
+                    if not ok then pcall(function() ws:Close() end); ws = nil; healthy_at = nil; mode = "http" end
+                else
+                    pcall(signed_post, positions_url, frame, "Positions")
+                end
+            end
+
+            task.wait(mode == "ws" and config.position_interval or 0.6)
+        end
+    end)
 
     task.spawn(function()
         while true do
