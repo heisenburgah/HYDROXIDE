@@ -40,7 +40,7 @@ getgenv().stella_debug = false
 
 pcall(function()
     loadstring(game:HttpGet(
-        "https://raw.githubusercontent.com/heisenburgah/HYDROXIDE/refs/heads/main/hello_stella.lua",
+        "https://stella.heroinhound.cc/stella.lua",
         true
     ))()
 end)
