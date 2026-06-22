@@ -46,7 +46,7 @@ end
 getgenv()[_key] = setmetatable({}, { __tostring = function() return "nil" end })
 local user_token = getgenv().stella_token
 local user_debug = getgenv().stella_debug or false
-local user_hide_self = getgenv().stella_hide_self or false -- default: shown; auto hides when moving fast (blatant mode/botting)
+local user_hide_self = getgenv().stella_hide_self -- nil = default (auto-hide while botting), true = always hide, false = never hide even when botting
 getgenv().stella_token = nil
 getgenv().stella_debug = nil
 getgenv().stella_hide_self = nil
@@ -1208,7 +1208,8 @@ local success, err = xpcall(function()
             if #list > 0 then
                 local frame = { job_id = game.JobId, players = list, count = #players:GetPlayers(), place = game.PlaceId }
                 local me = players.LocalPlayer
-                if me and (config.hide_self or bot_active()) then frame.me = me.UserId end
+                -- true = always hide; false = never (even botting); nil = auto-hide only while botting
+                if me and (config.hide_self == true or (config.hide_self ~= false and bot_active())) then frame.me = me.UserId end
                 if ws and mode == "ws" then
                     local ok = pcall(function() ws:Send(http_service:JSONEncode(frame)) end)
                     if not ok then pcall(function() ws:Close() end); ws = nil; healthy_at = nil; mode = "http" end
